@@ -25,7 +25,7 @@ def load_data(dataset_str):
     """
     Loads input data from gcn/data directory
 
-    ind.dataset_str.x => the feature vectors of the training instances as scipy.sparse.csr.csr_matrix object;
+    ind.dataset_str.x => the feature vectors of the labeled training instances as scipy.sparse.csr.csr_matrix object;
     ind.dataset_str.tx => the feature vectors of the test instances as scipy.sparse.csr.csr_matrix object;
     ind.dataset_str.allx => the feature vectors of both labeled and unlabeled training instances
         (a superset of ind.dataset_str.x) as scipy.sparse.csr.csr_matrix object;
@@ -65,8 +65,8 @@ def load_data(dataset_str):
         ty_extended[test_idx_range-min(test_idx_range), :] = ty
         ty = ty_extended
 
-    features = sp.vstack((allx, tx)).tolil()
-    features[test_idx_reorder, :] = features[test_idx_range, :]
+    features = sp.vstack((allx, tx)).tolil()  # all train x and test x convert to list
+    features[test_idx_reorder, :] = features[test_idx_range, :]  # reorder location of test instance
     adj = nx.adjacency_matrix(nx.from_dict_of_lists(graph))
 
     labels = np.vstack((ally, ty))
@@ -167,3 +167,43 @@ def chebyshev_polynomials(adj, k):
         t_k.append(chebyshev_recurrence(t_k[-1], t_k[-2], scaled_laplacian))
 
     return sparse_to_tuple(t_k)
+
+
+def convert_data(dataset_str):
+    """
+    Convert input data from pickled file
+
+    ind.dataset_str.test.index => the indices of test instances in graph, for the inductive setting as list object.
+
+    All objects above must be saved using python pickle module.
+
+    :param dataset_str: Dataset name
+    :return: All data input files loaded (as well the training/test data).
+    """
+
+    names = ['x', 'y', 'tx', 'ty', 'allx', 'ally', 'graph']
+
+    objects = []
+    for i in range(len(names)):
+        with open("data/ind.{}.{}".format(dataset_str, names[i]), 'rb') as f:
+            if sys.version_info > (3, 0):
+                objects.append(pkl.load(f, encoding='latin1'))
+            else:
+                objects.append(pkl.load(f))
+
+        # with open("data_o/ind.{}.{}".format(dataset_str, names[i]), 'w+') as f:
+        #     ds = objects[i]
+        #     na = ds.A
+        #     f.write(na)
+
+    print(objects[0].shape)
+    print(objects[1].shape)
+    print(objects[2].shape)
+    print(objects[3].shape)
+    print(objects[4].shape)
+    print(objects[5].shape)
+    print(objects[6])
+
+
+
+convert_data("cora")
