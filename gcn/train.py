@@ -29,9 +29,9 @@ flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(FLAGS.dataset)
 
 # Some preprocessing
-features = preprocess_features(features)
+features = preprocess_features(features)  # calculate D^-1 * A ,as tupled(coords, values, shape)
 if FLAGS.model == 'gcn':
-    support = [preprocess_adj(adj)]
+    support = [preprocess_adj(adj)]  # (D + I)^-1/2 * (A + I) * (D + I)^-1/2
     num_supports = 1
     model_func = GCN
 elif FLAGS.model == 'gcn_cheby':
