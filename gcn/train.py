@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import time
 import tensorflow as tf
+import pprint
 
 from gcn.utils import *
 from gcn.models import GCN, MLP
@@ -99,7 +100,14 @@ for epoch in range(FLAGS.epochs):
         print("Early stopping...")
         break
 
+ttv = tf.trainable_variables()[0]
+
+with sess.as_default():
+    ttvn = ttv.eval()
+    print(ttvn)
+
 print("Optimization Finished!")
+
 
 # Testing
 test_cost, test_acc, test_duration = evaluate(features, support, y_test, test_mask, placeholders)
