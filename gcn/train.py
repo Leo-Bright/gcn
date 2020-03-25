@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import time
 import tensorflow as tf
+import pprint
 
 from gcn.utils import *
 from gcn.models import GCN, MLP
@@ -29,9 +30,9 @@ flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(FLAGS.dataset)
 
 # Some preprocessing
-features = preprocess_features(features)
+features = preprocess_features(features)  # calculate D^-1 * A ,as tupled(coords, values, shape)
 if FLAGS.model == 'gcn':
-    support = [preprocess_adj(adj)]
+    support = [preprocess_adj(adj)]  # (D + I)^-1/2 * (A + I) * (D + I)^-1/2
     num_supports = 1
     model_func = GCN
 elif FLAGS.model == 'gcn_cheby':
@@ -99,7 +100,14 @@ for epoch in range(FLAGS.epochs):
         print("Early stopping...")
         break
 
+ttv = tf.trainable_variables()[0]
+
+with sess.as_default():
+    ttvn = ttv.eval()
+    print(ttvn)
+
 print("Optimization Finished!")
+
 
 # Testing
 test_cost, test_acc, test_duration = evaluate(features, support, y_test, test_mask, placeholders)

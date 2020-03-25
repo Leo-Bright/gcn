@@ -111,27 +111,27 @@ def sparse_to_tuple(sparse_mx):
 
 def preprocess_features(features):
     """Row-normalize feature matrix and convert to tuple representation"""
-    rowsum = np.array(features.sum(1))
-    r_inv = np.power(rowsum, -1).flatten()
-    r_inv[np.isinf(r_inv)] = 0.
-    r_mat_inv = sp.diags(r_inv)
-    features = r_mat_inv.dot(features)
+    rowsum = np.array(features.sum(1))     # lil_matrix, a sparse matrix object
+    r_inv = np.power(rowsum, -1).flatten()  # 求度矩阵元素的逆，然后摊平成list？
+    r_inv[np.isinf(r_inv)] = 0.           # will have inf ？some row are all zero
+    r_mat_inv = sp.diags(r_inv)      # return r_inv's diag matrix, as D^-1
+    features = r_mat_inv.dot(features)  # D^-1 * A
     return sparse_to_tuple(features)
 
 
 def normalize_adj(adj):
     """Symmetrically normalize adjacency matrix."""
-    adj = sp.coo_matrix(adj)
+    adj = sp.coo_matrix(adj)  # adj = A + I
     rowsum = np.array(adj.sum(1))
-    d_inv_sqrt = np.power(rowsum, -0.5).flatten()
-    d_inv_sqrt[np.isinf(d_inv_sqrt)] = 0.
+    d_inv_sqrt = np.power(rowsum, -0.5).flatten()  # d_inv_sqrt = adj^-1/2
+    d_inv_sqrt[np.isinf(d_inv_sqrt)] = 0.  # 0 always be 0
     d_mat_inv_sqrt = sp.diags(d_inv_sqrt)
     return adj.dot(d_mat_inv_sqrt).transpose().dot(d_mat_inv_sqrt).tocoo()
 
 
 def preprocess_adj(adj):
     """Preprocessing of adjacency matrix for simple GCN model and conversion to tuple representation."""
-    adj_normalized = normalize_adj(adj + sp.eye(adj.shape[0]))
+    adj_normalized = normalize_adj(adj + sp.eye(adj.shape[0]))   # COOrdinate format.
     return sparse_to_tuple(adj_normalized)
 
 
