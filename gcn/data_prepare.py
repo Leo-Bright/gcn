@@ -1,6 +1,9 @@
 import numpy as np
 import pickle as pkl
+
 from collections import defaultdict
+from gcn.utils import parse_index_file
+
 import random as rd
 import scipy.sparse as sp
 
@@ -132,13 +135,15 @@ def get_x_y_file(input_idx_file, node2tag, node2emb, idx2node, node2idx, output=
 
 def get_other_x_y_file(node2emb, node2idx, network):
 
+    other_idx = []
+
     x = []
 
     y = []
 
     idx_paths = ["sanfrancisco/ind.sanfrancisco.x.index",
-                 "sanfrancisco/ind.sanfrancisco.test.index",
-                 "sanfrancisco/ind.sanfrancisco.valid.index"]
+                 "sanfrancisco/ind.sanfrancisco.testx.index",
+                 "sanfrancisco/ind.sanfrancisco.validx.index"]
 
     idx_had = set()
     for path in idx_paths:
@@ -152,6 +157,7 @@ def get_other_x_y_file(node2emb, node2idx, network):
             continue
         else:
             idx_had.add(idx)
+            other_idx.append(idx)
             features = node2emb[node_id]
             label = np.zeros(9)
 
@@ -172,6 +178,10 @@ def get_other_x_y_file(node2emb, node2idx, network):
 
     with open("sanfrancisco/ind.sanfrancisco.othery", "wb") as f:
         pkl.dump(Y, f)
+
+    with open("sanfrancisco/ind.sanfrancisco.otherx.index", "w") as f:
+        for i in other_idx:
+            f.write(str(i) + '\n')
 
     network_idxs = set()
 
@@ -202,6 +212,35 @@ def get_all_x_y_file():
 
     with open("sanfrancisco/ind.sanfrancisco.ally", "wb") as f:
         pkl.dump(Y, f)
+
+
+def generate_global_idx(node2emb, idx2node):
+
+    idx_paths = ["sanfrancisco/ind.sanfrancisco.x.index",
+                 "sanfrancisco/ind.sanfrancisco.validx.index",
+                 "sanfrancisco/ind.sanfrancisco.otherx.index",
+                 "sanfrancisco/ind.sanfrancisco.testx.index"]
+
+    test_idx_reorder = parse_index_file("data/ind.{}.test.index".format("sanfrancisco"))
+    test_idx_range = np.sort(test_idx_reorder)
+
+    feature_idx = []
+    for i in range(len(idx_paths)):
+        with open(idx_paths[i]) as f:
+            for l in f:
+                f_idx = int(l.strip())
+                if idx2node[f_idx] not in node2emb:
+                    continue
+                feature_idx.append(int(l.strip()))
+
+    print(len(feature_idx))
+
+    features = np.array(feature_idx)
+
+    features[test_idx_reorder] = features[test_idx_range]
+
+    with open("sanfrancisco/gcn_128dim_embedding.idx", "wb") as f:
+        pkl.dump(features, f)
 
 
 def remove_redundant_node(road_network, redundant_idx):
@@ -247,13 +286,13 @@ if __name__ == '__main__':
 
     # get_all_x_y_file()
 
-    test_idxs = list(range(57257, 57257 + 997))
+    # test_idxs = list(range(57257, 57257 + 997))
+    #
+    # rd.shuffle(test_idxs)
 
-    rd.shuffle(test_idxs)
-
-    with open("sanfrancisco/ind.sanfrancisco.test.index", 'w') as f:
-        for idx in test_idxs:
-            f.write(str(idx) + '\n')
+    # with open("sanfrancisco/ind.sanfrancisco.test.index", 'w') as f:
+    #     for idx in test_idxs:
+    #         f.write(str(idx) + '\n')
 
     # remove_redundant_node(network, red_idx)
 
@@ -261,6 +300,8 @@ if __name__ == '__main__':
     #     pkl.dump(network, f)
 
     # print(red_idx)
+
+    generate_global_idx(node_emb_dict, idx_node_dict)
 
     print("1")
 
