@@ -3,7 +3,6 @@ from __future__ import print_function
 
 import time
 import tensorflow as tf
-import pprint
 
 from gcn.utils import *
 from gcn.models import GCN, MLP
@@ -19,8 +18,8 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('dataset', 'sanfrancisco', 'Dataset string.')  # 'cora', 'citeseer', 'pubmed'
 flags.DEFINE_string('model', 'gcn', 'Model string.')  # 'gcn', 'gcn_cheby', 'dense'
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
-flags.DEFINE_integer('epochs', 100, 'Number of epochs to train.')
-flags.DEFINE_integer('hidden1', 16, 'Number of units in hidden layer 1.')
+flags.DEFINE_integer('epochs', 1, 'Number of epochs to train.')
+flags.DEFINE_integer('hidden1', 128, 'Number of units in hidden layer 1.')
 flags.DEFINE_float('dropout', 0.5, 'Dropout rate (1 - keep probability).')
 flags.DEFINE_float('weight_decay', 5e-4, 'Weight for L2 loss on embedding matrix.')
 flags.DEFINE_integer('early_stopping', 10, 'Tolerance for early stopping (# of epochs).')
@@ -96,15 +95,27 @@ for epoch in range(FLAGS.epochs):
           "train_acc=", "{:.5f}".format(outs[2]), "val_loss=", "{:.5f}".format(cost),
           "val_acc=", "{:.5f}".format(acc), "time=", "{:.5f}".format(time.time() - t))
 
-    if epoch > FLAGS.early_stopping and cost_val[-1] > np.mean(cost_val[-(FLAGS.early_stopping+1):-1]):
-        print("Early stopping...")
-        break
+    # if epoch > FLAGS.early_stopping and cost_val[-1] > np.mean(cost_val[-(FLAGS.early_stopping+1):-1]):
+    #     print("Early stopping...")
+    #     break
 
-ttv = tf.trainable_variables()[0]
+# ttv = tf.trainable_variables()[0]
 
-with sess.as_default():
-    ttvn = ttv.eval()
-    print(ttvn)
+# with sess.as_default():
+#     ttvn = ttv.eval()
+#     print(ttvn)
+
+outs_v = sess.run([model.activations], feed_dict=feed_dict)
+
+out_activations = outs_v[0]
+
+l2_activation = out_activations[2]
+
+# with open("sanfrancisco/gcn_128dim_embedding.pkl", "wb") as f:
+#     pkl.dump(l2_activation, f)
+
+with open("sanfrancisco/gcn_128dim_embedding.pkl", "rb") as f:
+    aa = pkl.load(f)
 
 print("Optimization Finished!")
 
