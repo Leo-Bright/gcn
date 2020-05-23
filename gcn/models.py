@@ -1,7 +1,7 @@
 from gcn.layers import *
 from gcn.metrics import *
 
-flags = tf.app.flags
+flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 
 

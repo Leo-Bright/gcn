@@ -6,7 +6,7 @@ from gcn.utils import parse_index_file
 
 import random as rd
 import scipy.sparse as sp
-
+import json
 
 def get_ndarray(items, dim=9):
 
@@ -270,14 +270,26 @@ if __name__ == '__main__':
     with open("sanfrancisco/sf_node_idx_dict.pkl", "rb") as f:
         node_idx_dict = pkl.load(f)
 
+    with open("sanfrancisco/sf_node_idx_dict.json", 'w+') as f:
+        f.write(json.dumps(node_idx_dict))
+
     with open("sanfrancisco/sf_idx_node_dict.pkl", "rb") as f:
         idx_node_dict = pkl.load(f)
 
-    # with open("sanfrancisco/sanfrancisco_nodes_with_all_tag.pkl", "rb") as f:
-    #     node_tag_dict = pkl.load(f)
+    with open("sanfrancisco/sf_idx_node_dict.json", 'w+') as f:
+        f.write(json.dumps(idx_node_dict))
 
-    # with open("sanfrancisco/sf_shortest_distance_dim128_isrn2vec_node.pkl", "rb") as f:
-    #     node_emb_dict = pkl.load(f)
+    with open("sanfrancisco/sanfrancisco_nodes_with_all_tag.pkl", "rb") as f:
+        node_tag_dict = pkl.load(f)
+
+    with open("sanfrancisco/sanfrancisco_nodes_with_all_tag.json", 'w+') as f:
+        f.write(json.dumps(node_tag_dict))
+
+    with open("sanfrancisco/sf_shortest_distance_dim128_isrn2vec_node.pkl", "rb") as f:
+        node_emb_dict = pkl.load(f)
+
+    with open("sanfrancisco/sf_shortest_distance_dim128_isrn2vec_node.json", "w+") as f:
+        f.write(json.dumps(node_emb_dict))
 
     with open("sanfrancisco/ind.sanfrancisco.graph", "rb") as f:
         network = pkl.load(f)
@@ -287,6 +299,11 @@ if __name__ == '__main__':
 
     with open("sanfrancisco/gcn_128dim_embedding.pkl", "rb") as f:
         emb_vector = pkl.load(f)
+        tx = pkl.load(f)
+
+    print('asdf')
+
+
 
     # red_idx = get_x_y_file("sanfrancisco/ind.sanfrancisco.valid.index", node_tag_dict,
     #                        node_emb_dict, idx_node_dict,node_idx_dict, output=["validx", "validy"])
