@@ -243,6 +243,18 @@ def generate_global_idx(node2emb, idx2node):
         pkl.dump(features, f)
 
 
+def trans_emb_and_idx_file(emb_idx, emb_vector, idx2node):
+
+    assert len(emb_idx) == len(emb_vector)
+
+    with open("sanfrancisco/gcn_128dim.embedding", "w") as f:
+        for i in range(len(emb_idx)):
+            node_id = idx2node[emb_idx[i]]
+            emb = emb_vector[i]
+            emb_str = map(str, emb)
+            f.write(node_id + ' ' + ' '.join(emb_str) + '\n')
+
+
 def remove_redundant_node(road_network, redundant_idx):
 
     for idx in redundant_idx:
@@ -261,23 +273,20 @@ if __name__ == '__main__':
     with open("sanfrancisco/sf_idx_node_dict.pkl", "rb") as f:
         idx_node_dict = pkl.load(f)
 
-    with open("sanfrancisco/sanfrancisco_nodes_with_all_tag.pkl", "rb") as f:
-        node_tag_dict = pkl.load(f)
+    # with open("sanfrancisco/sanfrancisco_nodes_with_all_tag.pkl", "rb") as f:
+    #     node_tag_dict = pkl.load(f)
 
-    with open("sanfrancisco/sf_shortest_distance_dim128_isrn2vec_node.pkl", "rb") as f:
-        node_emb_dict = pkl.load(f)
-
-    with open("sanfrancisco/ind.sanfrancisco.graph", "rb") as f:
-        network = pkl.load(f)
+    # with open("sanfrancisco/sf_shortest_distance_dim128_isrn2vec_node.pkl", "rb") as f:
+    #     node_emb_dict = pkl.load(f)
 
     with open("sanfrancisco/ind.sanfrancisco.graph", "rb") as f:
         network = pkl.load(f)
 
-    with open("sanfrancisco/ind.sanfrancisco.allx", "rb") as f:
-        allx = pkl.load(f)
+    with open("sanfrancisco/gcn_128dim_embedding.idx", "rb") as f:
+        emb_idx = pkl.load(f)
 
-    with open("sanfrancisco/ind.sanfrancisco.tx", "rb") as f:
-        tx = pkl.load(f)
+    with open("sanfrancisco/gcn_128dim_embedding.pkl", "rb") as f:
+        emb_vector = pkl.load(f)
 
     # red_idx = get_x_y_file("sanfrancisco/ind.sanfrancisco.valid.index", node_tag_dict,
     #                        node_emb_dict, idx_node_dict,node_idx_dict, output=["validx", "validy"])
@@ -301,7 +310,9 @@ if __name__ == '__main__':
 
     # print(red_idx)
 
-    generate_global_idx(node_emb_dict, idx_node_dict)
+    # generate_global_idx(node_emb_dict, idx_node_dict)
+
+    trans_emb_and_idx_file(emb_idx, emb_vector, idx_node_dict)
 
     print("1")
 
