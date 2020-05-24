@@ -251,7 +251,7 @@ def trans_emb_and_idx_file(emb_idx, emb_vector, idx2node):
 
     assert len(emb_idx) == len(emb_vector)
 
-    with open("sanfrancisco/gcn_128dim.embedding", "w") as f:
+    with open("sanfrancisco/embeddings/sf_gcn_raw_feature_crossing_16dim_embedding", "w") as f:
         for i in range(len(emb_idx)):
             node_id = idx2node[emb_idx[i]]
             emb = emb_vector[i]
@@ -302,7 +302,7 @@ if __name__ == '__main__':
     with open("sanfrancisco/osm_data/nodes_crossing.json") as f:
         node_tag_dict = json.loads(f.readline())
 
-    node_emb_dict = trans_input_file_to_ndarray('sanfrancisco/embeddings/sanfrancisco_raw_feature_crossing.embeddings')
+    # node_emb_dict = trans_input_file_to_ndarray('sanfrancisco/embeddings/sanfrancisco_raw_feature_crossing.embeddings')
 
     # generate_network_graph('sanfrancisco/sf_roadnetwork', 'sanfrancisco/ind.sanfrancisco.graph', node_idx_dict)
 
@@ -312,11 +312,11 @@ if __name__ == '__main__':
     # with open("sanfrancisco/ind.sanfrancisco.graph.json", "w+") as f:
     #     f.write(json.dumps(network))
 
-    # with open("sanfrancisco/sf_gcn_raw_feature_crossing_16dim_embedding.idx.pkl", "rb") as f:
-    #     emb_idx = pkl.load(f)
-    #
-    # with open("sanfrancisco/gcn_128dim_embedding.pkl", "rb") as f:
-    #     emb_vector = pkl.load(f)
+    with open("sanfrancisco/embeddings/sf_gcn_raw_feature_crossing_16dim_embedding.idx.pkl", "rb") as f:
+        emb_idx = pkl.load(f)
+
+    with open("sanfrancisco/embeddings/sf_gcn_raw_feature_crossing_16dim_embedding.pkl", "rb") as f:
+        emb_vector = pkl.load(f)
 
     # red_idx = get_x_y_file("sanfrancisco/ind.sanfrancisco.testx.index", node_tag_dict,
     #                        node_emb_dict, idx_node_dict, node_idx_dict, output=["tx", "ty"])
@@ -340,7 +340,7 @@ if __name__ == '__main__':
 
     # generate_global_idx(node_emb_dict, idx_node_dict)
 
-    # trans_emb_and_idx_file(emb_idx, emb_vector, idx_node_dict)
+    trans_emb_and_idx_file(emb_idx, emb_vector, idx_node_dict)
 
     print("1")
 
