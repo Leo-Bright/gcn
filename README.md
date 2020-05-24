@@ -70,3 +70,12 @@ Please cite our paper if you use this code in your own work:
   year={2017}
 }
 ```
+
+## Memo
+
+### tag file
+
+> gcn/sanfrancisco/sanfrancisco_nodes_with_all.tag
+
+1. traffic_signals == 4
+2. crossing == 5

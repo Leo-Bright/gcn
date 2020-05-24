@@ -8,6 +8,7 @@ import random as rd
 import scipy.sparse as sp
 import json
 
+
 def get_ndarray(items, dim=9):
 
     if len(items) == 1 and items != "-1":
@@ -107,15 +108,17 @@ def get_x_y_file(input_idx_file, node2tag, node2emb, idx2node, node2idx, output=
                 red.add(int(l.strip()))
                 continue
             features = node2emb[node_id]
-            label = node2tag[node_id]
+            # label = node2tag[node_id]
+            label = [1] if node_id in node2tag else [0]
 
             new_features = []
             for i in range(len(features)):
                 new_features.append(float(features[i]))
 
-            new_label = []
-            for i in range(len(label)):
-                new_label.append(int(label[i]))
+            # new_label = []
+            # for i in range(len(label)):
+            #     new_label.append(int(label[i]))
+            new_label = label
 
             x.append(new_features)
             y.append(np.array(new_label))
@@ -133,6 +136,7 @@ def get_x_y_file(input_idx_file, node2tag, node2emb, idx2node, node2idx, output=
     return red
 
 
+# the samples that have not label
 def get_other_x_y_file(node2emb, node2idx, network):
 
     other_idx = []
@@ -159,7 +163,7 @@ def get_other_x_y_file(node2emb, node2idx, network):
             idx_had.add(idx)
             other_idx.append(idx)
             features = node2emb[node_id]
-            label = np.zeros(9)
+            label = np.zeros(1)
 
             new_features = []
             for i in range(len(features)):
@@ -221,7 +225,7 @@ def generate_global_idx(node2emb, idx2node):
                  "sanfrancisco/ind.sanfrancisco.otherx.index",
                  "sanfrancisco/ind.sanfrancisco.testx.index"]
 
-    test_idx_reorder = parse_index_file("data/ind.{}.test.index".format("sanfrancisco"))
+    test_idx_reorder = parse_index_file("sanfrancisco/ind.{}.test.index".format("sanfrancisco"))
     test_idx_range = np.sort(test_idx_reorder)
 
     feature_idx = []
@@ -239,7 +243,7 @@ def generate_global_idx(node2emb, idx2node):
 
     features[test_idx_reorder] = features[test_idx_range]
 
-    with open("sanfrancisco/gcn_128dim_embedding.idx", "wb") as f:
+    with open("sanfrancisco/sf_gcn_raw_feature_crossing_16dim_embedding.idx.pkl", "wb") as f:
         pkl.dump(features, f)
 
 
@@ -265,48 +269,34 @@ def remove_redundant_node(road_network, redundant_idx):
         road_network[k] = list(set(nodes) - redundant_idx)
 
 
+def get_node_emb_dict(emb):
+    pass
+
+
 if __name__ == '__main__':
 
     with open("sanfrancisco/sf_node_idx_dict.pkl", "rb") as f:
         node_idx_dict = pkl.load(f)
 
-    with open("sanfrancisco/sf_node_idx_dict.json", 'w+') as f:
-        f.write(json.dumps(node_idx_dict))
-
     with open("sanfrancisco/sf_idx_node_dict.pkl", "rb") as f:
         idx_node_dict = pkl.load(f)
 
-    with open("sanfrancisco/sf_idx_node_dict.json", 'w+') as f:
-        f.write(json.dumps(idx_node_dict))
+    with open("sanfrancisco/osm_data/nodes_crossing.json") as f:
+        node_tag_dict = json.loads(f.readline())
 
-    with open("sanfrancisco/sanfrancisco_nodes_with_all_tag.pkl", "rb") as f:
-        node_tag_dict = pkl.load(f)
-
-    with open("sanfrancisco/sanfrancisco_nodes_with_all_tag.json", 'w+') as f:
-        f.write(json.dumps(node_tag_dict))
-
-    with open("sanfrancisco/sf_shortest_distance_dim128_isrn2vec_node.pkl", "rb") as f:
-        node_emb_dict = pkl.load(f)
-
-    with open("sanfrancisco/sf_shortest_distance_dim128_isrn2vec_node.json", "w+") as f:
-        f.write(json.dumps(node_emb_dict))
+    node_emb_dict = trans_input_file_to_ndarray('sanfrancisco/embeddings/sanfrancisco_raw_feature_crossing.embeddings')
 
     with open("sanfrancisco/ind.sanfrancisco.graph", "rb") as f:
         network = pkl.load(f)
 
-    with open("sanfrancisco/gcn_128dim_embedding.idx", "rb") as f:
-        emb_idx = pkl.load(f)
+    # with open("sanfrancisco/sf_gcn_raw_feature_crossing_16dim_embedding.idx.pkl", "rb") as f:
+    #     emb_idx = pkl.load(f)
+    #
+    # with open("sanfrancisco/gcn_128dim_embedding.pkl", "rb") as f:
+    #     emb_vector = pkl.load(f)
 
-    with open("sanfrancisco/gcn_128dim_embedding.pkl", "rb") as f:
-        emb_vector = pkl.load(f)
-        tx = pkl.load(f)
-
-    print('asdf')
-
-
-
-    # red_idx = get_x_y_file("sanfrancisco/ind.sanfrancisco.valid.index", node_tag_dict,
-    #                        node_emb_dict, idx_node_dict,node_idx_dict, output=["validx", "validy"])
+    # red_idx = get_x_y_file("sanfrancisco/ind.sanfrancisco.testx.index", node_tag_dict,
+    #                        node_emb_dict, idx_node_dict, node_idx_dict, output=["tx", "ty"])
 
     # red_idx = get_other_x_y_file(node_emb_dict, node_idx_dict, network)
 
@@ -320,16 +310,14 @@ if __name__ == '__main__':
     #     for idx in test_idxs:
     #         f.write(str(idx) + '\n')
 
+    # print(red_idx)
     # remove_redundant_node(network, red_idx)
-
     # with open("sanfrancisco/ind.sanfrancisco.graph", "wb") as f:
     #     pkl.dump(network, f)
 
-    # print(red_idx)
+    generate_global_idx(node_emb_dict, idx_node_dict)
 
-    # generate_global_idx(node_emb_dict, idx_node_dict)
-
-    trans_emb_and_idx_file(emb_idx, emb_vector, idx_node_dict)
+    # trans_emb_and_idx_file(emb_idx, emb_vector, idx_node_dict)
 
     print("1")
 
