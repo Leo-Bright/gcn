@@ -269,8 +269,26 @@ def remove_redundant_node(road_network, redundant_idx):
         road_network[k] = list(set(nodes) - redundant_idx)
 
 
-def get_node_emb_dict(emb):
-    pass
+def generate_network_graph(network_file_path, graph_file_path, node_idx_dict):
+
+    graph = {}
+
+    with open(network_file_path) as f:
+        for line in f:
+            ids = line.strip().split(' ')
+            start = node_idx_dict[ids[0]]
+            end = node_idx_dict[ids[1]]
+
+            if start not in graph:
+                graph[start] = []
+            graph[start].append(end)
+
+            if end not in graph:
+                graph[end] = []
+            graph[end].append(start)
+
+    with open(graph_file_path, 'wb') as f:
+        pkl.dump(graph, f)
 
 
 if __name__ == '__main__':
@@ -285,6 +303,8 @@ if __name__ == '__main__':
         node_tag_dict = json.loads(f.readline())
 
     node_emb_dict = trans_input_file_to_ndarray('sanfrancisco/embeddings/sanfrancisco_raw_feature_crossing.embeddings')
+
+    # generate_network_graph('sanfrancisco/sf_roadnetwork', 'sanfrancisco/ind.sanfrancisco.graph', node_idx_dict)
 
     with open("sanfrancisco/ind.sanfrancisco.graph", "rb") as f:
         network = pkl.load(f)
@@ -315,7 +335,7 @@ if __name__ == '__main__':
     # with open("sanfrancisco/ind.sanfrancisco.graph", "wb") as f:
     #     pkl.dump(network, f)
 
-    generate_global_idx(node_emb_dict, idx_node_dict)
+    # generate_global_idx(node_emb_dict, idx_node_dict)
 
     # trans_emb_and_idx_file(emb_idx, emb_vector, idx_node_dict)
 
