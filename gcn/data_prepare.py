@@ -76,11 +76,13 @@ def split_labeled_instance(all_labeled_pkl_path):
 
     size = len(all_labeled_samples)
 
-    x = all_labeled_samples[:0 - size//10]
+    x = all_labeled_samples[:size//5]
 
-    test = all_labeled_samples[0 - size//10:0 - size//20]
+    valid = all_labeled_samples[size//5: 3 * size//5]
 
-    valid = all_labeled_samples[0 - size//20:]
+    test = all_labeled_samples[3 * size//5:]
+
+    print(len(test))
 
     with open("sanfrancisco/ind.sanfrancisco.x.index", "w+") as f:
         for item in x:
@@ -388,7 +390,7 @@ if __name__ == '__main__':
     ########################################
 
     # to generate test samples index
-    # test_idxs = list(range(57404, 57404 + 1000))
+    # test_idxs = list(range(58404 - 1170, 58404))
     # rd.shuffle(test_idxs)
     # with open("sanfrancisco/ind.sanfrancisco.test.index", 'w') as f:
     #     for idx in test_idxs:
