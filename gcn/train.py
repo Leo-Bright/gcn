@@ -18,7 +18,7 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string('dataset', 'sanfrancisco', 'Dataset string.')  # 'cora', 'citeseer', 'pubmed'
 flags.DEFINE_string('model', 'gcn', 'Model string.')  # 'gcn', 'gcn_cheby', 'dense'
 flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
-flags.DEFINE_integer('epochs', 1, 'Number of epochs to train.')
+flags.DEFINE_integer('epochs', 10, 'Number of epochs to train.')
 flags.DEFINE_integer('hidden1', 16, 'Number of units in hidden layer 1.')
 flags.DEFINE_float('dropout', 0.5, 'Dropout rate (1 - keep probability).')
 flags.DEFINE_float('weight_decay', 5e-4, 'Weight for L2 loss on embedding matrix.')
@@ -27,6 +27,12 @@ flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
 
 # Load data
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(FLAGS.dataset)
+
+count = 0
+for item in y_test.tolist():
+    if item == 1:
+        count += 1
+print(count)
 
 # Some preprocessing
 features = preprocess_features(features)  # calculate D^-1 * A ,as tupled(coords, values, shape)
@@ -111,7 +117,7 @@ out_activations = outs_v[0]
 
 l2_activation = out_activations[2]
 
-with open("sanfrancisco/embeddings/sf_gcn_raw_feature_crossing_16dim_embedding.pkl", "wb") as f:
+with open("sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_10epoch.embedding.pkl", "wb") as f:
     pkl.dump(l2_activation, f)
 
 # with open("sanfrancisco/gcn_128dim_embedding.pkl", "rb") as f:

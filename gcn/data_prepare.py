@@ -74,11 +74,13 @@ def split_labeled_instance(all_labeled_pkl_path):
     rd.shuffle(all_labeled_samples)
     rd.shuffle(all_labeled_samples)
 
-    x = all_labeled_samples[:-1500]
+    size = len(all_labeled_samples)
 
-    test = all_labeled_samples[-1500:-500]
+    x = all_labeled_samples[:0 - size//10]
 
-    valid = all_labeled_samples[-500:]
+    test = all_labeled_samples[0 - size//10:0 - size//20]
+
+    valid = all_labeled_samples[0 - size//20:]
 
     with open("sanfrancisco/ind.sanfrancisco.x.index", "w+") as f:
         for item in x:
@@ -137,17 +139,13 @@ def get_x_y_file(input_idx_file, node2tag, node2emb, idx2node, node2idx, output=
 
 
 # the samples that have not label
-def get_other_x_y_file(node2emb, node2idx, network):
+def get_other_x_y_file(idx_paths, node2emb, node2idx, network):
 
     other_idx = []
 
     x = []
 
     y = []
-
-    idx_paths = ["sanfrancisco/ind.sanfrancisco.x.index",
-                 "sanfrancisco/ind.sanfrancisco.testx.index",
-                 "sanfrancisco/ind.sanfrancisco.validx.index"]
 
     idx_had = set()
     for path in idx_paths:
@@ -218,7 +216,7 @@ def get_all_x_y_file():
         pkl.dump(Y, f)
 
 
-def generate_global_idx(node2emb, idx2node):
+def generate_global_idx(node2emb, idx2node, output_path):
 
     idx_paths = ["sanfrancisco/ind.sanfrancisco.x.index",
                  "sanfrancisco/ind.sanfrancisco.validx.index",
@@ -243,15 +241,15 @@ def generate_global_idx(node2emb, idx2node):
 
     features[test_idx_reorder] = features[test_idx_range]
 
-    with open("sanfrancisco/sf_gcn_raw_feature_crossing_16dim_embedding.idx.pkl", "wb") as f:
+    with open(output_path, "wb") as f:
         pkl.dump(features, f)
 
 
-def trans_emb_and_idx_file(emb_idx, emb_vector, idx2node):
+def trans_emb_and_idx_file(emb_idx, emb_vector, idx2node, output_emb_path):
 
     assert len(emb_idx) == len(emb_vector)
 
-    with open("sanfrancisco/embeddings/sf_gcn_raw_feature_crossing_16dim_embedding", "w") as f:
+    with open(output_emb_path, "w") as f:
         for i in range(len(emb_idx)):
             node_id = idx2node[emb_idx[i]]
             emb = emb_vector[i]
@@ -267,6 +265,9 @@ def remove_redundant_node(road_network, redundant_idx):
     for k in road_network:
         nodes = road_network[k]
         road_network[k] = list(set(nodes) - redundant_idx)
+
+    with open(graph_file_path, "wb") as graph_file:
+        pkl.dump(road_network, graph_file)
 
 
 def generate_network_graph(network_file_path, graph_file_path, node_idx_dict):
@@ -291,6 +292,44 @@ def generate_network_graph(network_file_path, graph_file_path, node_idx_dict):
         pkl.dump(graph, f)
 
 
+def gen_all_labeled_pkl(node2tag, node2idx, all_labeled_pkl_path):
+
+    all_labeled_samples_idx = []
+
+    count_labeled = 0
+    count_unlabeled = 0
+    for key in node2idx:
+        if key in node2tag:
+            all_labeled_samples_idx.append(node2idx[key])
+            count_labeled += 1
+        elif count_unlabeled < count_labeled:
+            all_labeled_samples_idx.append(node2idx[key])
+            count_unlabeled += 1
+
+    print(len(all_labeled_samples_idx))
+
+    with open(all_labeled_pkl_path, 'wb') as f:
+        pkl.dump(all_labeled_samples_idx, f)
+
+
+def gen_node_idx_pkl_path(node2emb, node2idx_pkl_path, idx2node_pkl_path):
+
+    node2idx = {}
+    idx2node = {}
+
+    count = 0
+    for key in node2emb:
+        node2idx[key] = count
+        idx2node[count] = key
+        count += 1
+
+    with open(node2idx_pkl_path, 'wb') as f:
+        pkl.dump(node2idx, f)
+
+    with open(idx2node_pkl_path, 'wb') as f:
+        pkl.dump(idx2node, f)
+
+
 if __name__ == '__main__':
 
     with open("sanfrancisco/sf_node_idx_dict.pkl", "rb") as f:
@@ -302,45 +341,72 @@ if __name__ == '__main__':
     with open("sanfrancisco/osm_data/nodes_crossing.json") as f:
         node_tag_dict = json.loads(f.readline())
 
-    # node_emb_dict = trans_input_file_to_ndarray('sanfrancisco/embeddings/sanfrancisco_raw_feature_crossing.embeddings')
+    node_emb_dict = trans_input_file_to_ndarray('sanfrancisco/embeddings/sanfrancisco_raw_feature_none.embeddings')
 
     # generate_network_graph('sanfrancisco/sf_roadnetwork', 'sanfrancisco/ind.sanfrancisco.graph', node_idx_dict)
 
-    with open("sanfrancisco/ind.sanfrancisco.graph", "rb") as f:
+    graph_file_path = "sanfrancisco/ind.sanfrancisco.graph"
+    with open(graph_file_path, "rb") as f:
         network = pkl.load(f)
 
     # with open("sanfrancisco/ind.sanfrancisco.graph.json", "w+") as f:
     #     f.write(json.dumps(network))
 
-    with open("sanfrancisco/embeddings/sf_gcn_raw_feature_crossing_16dim_embedding.idx.pkl", "rb") as f:
+    gcn_emb_file_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_10epoch.embedding'
+    gcn_emb_idx_file = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16dim_embedding.idx.pkl'
+    with open(gcn_emb_idx_file, "rb") as f:
         emb_idx = pkl.load(f)
 
-    with open("sanfrancisco/embeddings/sf_gcn_raw_feature_crossing_16dim_embedding.pkl", "rb") as f:
+    gcn_emb_pkl_path = gcn_emb_file_path + '.pkl'
+    with open(gcn_emb_pkl_path, "rb") as f:
         emb_vector = pkl.load(f)
 
-    # red_idx = get_x_y_file("sanfrancisco/ind.sanfrancisco.testx.index", node_tag_dict,
-    #                        node_emb_dict, idx_node_dict, node_idx_dict, output=["tx", "ty"])
+    x_index = ['sanfrancisco/ind.sanfrancisco.x.index', 'x', 'y']
+    test_x_index = ['sanfrancisco/ind.sanfrancisco.testx.index', 'tx', 'ty']
+    valid_x_index = ['sanfrancisco/ind.sanfrancisco.validx.index', 'validx', 'validy']
+    indexes_to_gen = [x_index, test_x_index, valid_x_index]
 
-    # red_idx = get_other_x_y_file(node_emb_dict, node_idx_dict, network)
+    # step1: generate x,testx,validx,y,testy,validy file
+    # for index in indexes_to_gen:
+    #     red_idx = get_x_y_file(index[0], node_tag_dict, node_emb_dict, idx_node_dict, node_idx_dict, output=index[1:])
+    #     if len(red_idx) > 0:
+    #         print(len(red_idx))
+    #         remove_redundant_node(network, red_idx, graph_file_path)
 
+    # step2: generate otherx, othery file
+    # idx_paths = [x_index[0], test_x_index[0], valid_x_index[0]]
+    # red_idx = get_other_x_y_file(idx_paths, node_emb_dict, node_idx_dict, network)
+    # if len(red_idx) > 0:
+    #     print(len(red_idx))
+    #     remove_redundant_node(network, red_idx, graph_file_path)
+
+    # step3: generate allx, ally files that use in train
     # get_all_x_y_file()
 
-    # test_idxs = list(range(57257, 57257 + 997))
-    #
-    # rd.shuffle(test_idxs)
+    ########################################
+    # under is not main process
+    ########################################
 
+    # to generate test samples index
+    # test_idxs = list(range(57404, 57404 + 1000))
+    # rd.shuffle(test_idxs)
     # with open("sanfrancisco/ind.sanfrancisco.test.index", 'w') as f:
     #     for idx in test_idxs:
     #         f.write(str(idx) + '\n')
 
-    # print(red_idx)
-    # remove_redundant_node(network, red_idx)
-    # with open("sanfrancisco/ind.sanfrancisco.graph", "wb") as f:
-    #     pkl.dump(network, f)
+    # step0-1: generate the init indexes file to x, testx, validx
+    # node_idx_pkl_path = 'sanfrancisco/sf_node_idx_dict.pkl'
+    # idx_node_pkl_path = 'sanfrancisco/sf_idx_node_dict.pkl'
+    # gen_node_idx_pkl_path(node_emb_dict, node_idx_pkl_path, idx_node_pkl_path)
+    # step0-2
+    # all_labeled_pkl_path = 'sanfrancisco/ind.sanfrancisco.all.labeled.pkl'
+    # gen_all_labeled_pkl(node_tag_dict, node_idx_dict, all_labeled_pkl_path)
+    # step0-3
+    # split_labeled_instance(all_labeled_pkl_path)
 
-    # generate_global_idx(node_emb_dict, idx_node_dict)
+    # generate_global_idx(node_emb_dict, idx_node_dict, gcn_emb_idx_file)
 
-    trans_emb_and_idx_file(emb_idx, emb_vector, idx_node_dict)
+    trans_emb_and_idx_file(emb_idx, emb_vector, idx_node_dict, gcn_emb_file_path)
 
     print("1")
 
