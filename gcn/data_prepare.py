@@ -278,7 +278,7 @@ def generate_network_graph(network_file_path, graph_file_path, node_idx_dict):
             graph[end].append(start)
 
     with open(graph_file_path + '.json', 'w+') as f:
-        json.dump(graph)
+        f.write(json.dumps(graph))
 
     with open(graph_file_path, 'wb') as f:
         pkl.dump(graph, f)
