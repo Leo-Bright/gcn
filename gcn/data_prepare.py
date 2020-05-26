@@ -115,15 +115,12 @@ def get_x_y_file(input_idx_file, node2tag, node2emb, idx2node, output=["x", "y"]
                 continue
             features = node2emb[node_id]
             # label = node2tag[node_id]
-            label = [1] if node_id in node2tag else [0]
+            label = [1, 0] if node_id in node2tag else [0, 1]
 
             new_features = []
             for i in range(len(features)):
                 new_features.append(float(features[i]))
 
-            # new_label = []
-            # for i in range(len(label)):
-            #     new_label.append(int(label[i]))
             new_label = label
 
             x.append(new_features)
@@ -165,7 +162,7 @@ def get_other_x_y_file(idx_paths, node2emb, node2idx, network):
             idx_had.add(idx)
             other_idx.append(idx)
             features = node2emb[node_id]
-            label = np.zeros(1)
+            label = np.zeros(2)
 
             new_features = []
             for i in range(len(features)):
@@ -388,11 +385,11 @@ if __name__ == '__main__':
     # idx_node_pkl_path = 'sanfrancisco/sf_idx_node_dict.pkl'
     # gen_node_idx_pkl_path(node_emb_dict, node_idx_pkl_path, idx_node_pkl_path)
 
-    # step0-2
+    # step0-2: generate idx pkl file of the all labeled samples that use to train/test/valid
     # all_labeled_pkl_path = 'sanfrancisco/ind.sanfrancisco.all.labeled.pkl'
     # gen_all_labeled_pkl(node_tag_dict, node_idx_dict, all_labeled_pkl_path)
 
-    # step0-3
+    # step0-3: generate idx file of the all labeled samples that use to test
     # all_labeled_pkl_path = 'sanfrancisco/ind.sanfrancisco.all.labeled.pkl'
     # samples_size = split_labeled_instance(all_labeled_pkl_path, 4000, 500)
     # test_index_file_path = 'sanfrancisco/ind.sanfrancisco.test.index'

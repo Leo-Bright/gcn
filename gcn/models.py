@@ -148,6 +148,9 @@ class GCN(Model):
         for var in self.layers[0].vars.values():
             self.loss += FLAGS.weight_decay * tf.nn.l2_loss(var)
 
+        for var in self.layers[1].vars.values():
+            self.loss += FLAGS.weight_decay * tf.nn.l2_loss(var)
+
         # Cross entropy error
         self.loss += masked_softmax_cross_entropy(self.outputs, self.placeholders['labels'],
                                                   self.placeholders['labels_mask'])
@@ -164,28 +167,32 @@ class GCN(Model):
                                             act=tf.nn.relu,
                                             dropout=True,
                                             sparse_inputs=True,
-                                            logging=self.logging))
+                                            logging=self.logging,
+                                            bias=True))
 
         self.layers.append(GraphConvolution(input_dim=FLAGS.hidden1,
                                             output_dim=FLAGS.hidden1,
                                             placeholders=self.placeholders,
-                                            act=lambda x: x,
+                                            act=tf.nn.relu,
                                             dropout=True,
-                                            logging=self.logging))
+                                            logging=self.logging,
+                                            bias=True))
 
         # self.layers.append(GraphConvolution(input_dim=FLAGS.hidden1,
         #                                     output_dim=self.output_dim,
         #                                     placeholders=self.placeholders,
         #                                     act=lambda x: x,
         #                                     dropout=True,
-        #                                     logging=self.logging))
+        #                                     logging=self.logging,
+        #                                     bias=True))
 
         self.layers.append(Dense(input_dim=FLAGS.hidden1,
                                  output_dim=self.output_dim,
                                  placeholders=self.placeholders,
-                                 act=lambda x: x,
+                                 act=tf.nn.sigmoid,
                                  dropout=True,
-                                 logging=self.logging))
+                                 logging=self.logging,
+                                 bias=True))
 
     def predict(self):
         return tf.nn.softmax(self.outputs)

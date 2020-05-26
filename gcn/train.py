@@ -17,22 +17,22 @@ flags = tf.compat.v1.flags
 FLAGS = flags.FLAGS
 flags.DEFINE_string('dataset', 'sanfrancisco', 'Dataset string.')  # 'cora', 'citeseer', 'pubmed'
 flags.DEFINE_string('model', 'gcn', 'Model string.')  # 'gcn', 'gcn_cheby', 'dense'
-flags.DEFINE_float('learning_rate', 0.001, 'Initial learning rate.')
+flags.DEFINE_float('learning_rate', 0.01, 'Initial learning rate.')
 flags.DEFINE_integer('epochs', 200, 'Number of epochs to train.')
 flags.DEFINE_integer('hidden1', 16, 'Number of units in hidden layer 1.')
 flags.DEFINE_float('dropout', 0.5, 'Dropout rate (1 - keep probability).')
 flags.DEFINE_float('weight_decay', 5e-4, 'Weight for L2 loss on embedding matrix.')
 flags.DEFINE_integer('early_stopping', 10, 'Tolerance for early stopping (# of epochs).')
-flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
+# flags.DEFINE_integer('max_degree', 3, 'Maximum Chebyshev polynomial degree.')
 
 # Load data
 adj, features, y_train, y_val, y_test, train_mask, val_mask, test_mask = load_data(FLAGS.dataset)
 
-count = 0
-for item in y_test.tolist():
-    if item == 1:
-        count += 1
-print(count)
+# count = 0
+# for item in y_test.tolist():
+#     if item == 1:
+#         count += 1
+# print(count)
 
 # Some preprocessing
 features = preprocess_features(features)  # calculate D^-1 * A ,as tupled(coords, values, shape)
@@ -90,7 +90,7 @@ for epoch in range(FLAGS.epochs):
     feed_dict.update({placeholders['dropout']: FLAGS.dropout})
 
     # Training step
-    outs = sess.run([model.opt_op, model.loss, model.accuracy, model.outputs, model.placeholders], feed_dict=feed_dict)
+    outs = sess.run([model.opt_op, model.loss, model.accuracy, model.outputs, model.placeholders, model.activations], feed_dict=feed_dict)
 
     # Validation
     cost, acc, duration = evaluate(features, support, y_val, val_mask, placeholders)
@@ -104,12 +104,6 @@ for epoch in range(FLAGS.epochs):
     if epoch > FLAGS.early_stopping and cost_val[-1] > np.mean(cost_val[-(FLAGS.early_stopping+1):-1]):
         print("Early stopping...")
         break
-
-outs_v = sess.run([model.activations], feed_dict=feed_dict)
-
-out_activations = outs_v[0]
-
-l2_activation = out_activations[2]
 
 print("Optimization Finished!")
 
@@ -133,10 +127,12 @@ def save_emb_to_file(emb_vector, idx2node_dict_pkl_path, emb_idx_pkl_path, emb_f
 
 
 # save gcn embeddings to file
+out_activations = outs[5]
+last_layer_activation = out_activations[2]
 gcn_emb_file_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_traffic.embedding'
 gcn_emb_idx_pkl_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_traffic.embedding.idx.pkl'
 idx_node_dict_pkl_path = 'sanfrancisco/sf_idx_node_dict.pkl'
-save_emb_to_file(l2_activation, idx_node_dict_pkl_path, gcn_emb_idx_pkl_path, gcn_emb_file_path)
+save_emb_to_file(last_layer_activation, idx_node_dict_pkl_path, gcn_emb_idx_pkl_path, gcn_emb_file_path)
 print("Embeddings Saved to " + gcn_emb_file_path + ' !')
 
 
