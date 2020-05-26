@@ -277,6 +277,9 @@ def generate_network_graph(network_file_path, graph_file_path, node_idx_dict):
                 graph[end] = []
             graph[end].append(start)
 
+    with open(graph_file_path + '.json', 'w+') as f:
+        json.dump(graph)
+
     with open(graph_file_path, 'wb') as f:
         pkl.dump(graph, f)
 
@@ -342,9 +345,9 @@ if __name__ == '__main__':
 
     node_emb_dict = trans_input_file_to_ndarray('sanfrancisco/embeddings/sanfrancisco_raw_feature_none.embeddings')
 
-    graph_file_path = "sanfrancisco/ind.sanfrancisco.graph"
-    with open(graph_file_path, "rb") as f:
-        network = pkl.load(f)
+    # graph_file_path = "sanfrancisco/ind.sanfrancisco.graph"
+    # with open(graph_file_path, "rb") as f:
+    #     network = pkl.load(f)
 
     # with open("sanfrancisco/ind.sanfrancisco.graph.json", "w+") as f:
     #     f.write(json.dumps(network))
@@ -378,7 +381,7 @@ if __name__ == '__main__':
     ########################################
 
     # step0-0: generate the road network graph
-    # generate_network_graph('sanfrancisco/sf_roadnetwork', 'sanfrancisco/ind.sanfrancisco.graph', node_idx_dict)
+    generate_network_graph('sanfrancisco/sf_roadnetwork', 'sanfrancisco/ind.sanfrancisco.graph', node_idx_dict)
 
     # step0-1: generate the init indexes file to x, testx, validx
     # node_idx_pkl_path = 'sanfrancisco/sf_node_idx_dict.pkl'
