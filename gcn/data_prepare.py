@@ -365,7 +365,7 @@ if __name__ == '__main__':
     #         remove_redundant_node(network, red_idx, graph_file_path)
 
     # step2: generate otherx, othery file
-    # gcn_emb_idx_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_turning_circle.embedding.idx.pkl'
+    # gcn_emb_idx_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_target_is_turning_circle.embedding.idx.pkl'
     # idx_paths = [x_index[0], test_x_index[0], valid_x_index[0]]
     # red_idx = get_other_x_y_file(idx_paths, node_emb_dict, node_idx_dict, network)
     # if len(red_idx) > 0:
@@ -386,7 +386,7 @@ if __name__ == '__main__':
     # gen_node_idx_pkl_path(node_emb_dict, node_idx_pkl_path, idx_node_pkl_path)
 
     # step0-1: generate the road network graph
-    # generate_network_graph('sanfrancisco/sf_roadnetwork', 'sanfrancisco/ind.sanfrancisco.graph', node_idx_dict)
+    # generate_network_graph('sanfrancisco/osm_data/sf_roadnetwork', 'sanfrancisco/ind.sanfrancisco.graph', node_idx_dict)
 
     # step0-2: generate idx pkl file of the all labeled samples that use to train/test/valid
     # all_labeled_pkl_path = 'sanfrancisco/ind.sanfrancisco.all.labeled.pkl'

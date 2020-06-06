@@ -129,10 +129,10 @@ def save_emb_to_file(emb_vector, idx2node_dict_pkl_path, emb_idx_pkl_path, emb_f
 # save gcn embeddings to file
 out_activations = outs[5]
 last_layer_activation = out_activations[2]
-gcn_emb_file_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_turning_circle.embedding'
-gcn_emb_idx_pkl_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_turning_circle.embedding.idx.pkl'
+gcn_emb_file_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_target_is_crossing.embedding'
+gcn_emb_idx_pkl_path = 'sanfrancisco/embeddings/sf_gcn_raw_feature_none_16d_target_is_crossing.embedding.idx.pkl'
 idx_node_dict_pkl_path = 'sanfrancisco/sf_idx_node_dict.pkl'
-save_emb_to_file(last_layer_activation, idx_node_dict_pkl_path, gcn_emb_idx_pkl_path, gcn_emb_file_path)
+# save_emb_to_file(last_layer_activation, idx_node_dict_pkl_path, gcn_emb_idx_pkl_path, gcn_emb_file_path)
 print("Embeddings Saved to " + gcn_emb_file_path + ' !')
 
 
